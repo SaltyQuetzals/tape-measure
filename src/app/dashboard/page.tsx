@@ -1,5 +1,5 @@
 import { ChartLineInteractive } from '@/components/chart-line-interactive'
-import { DataTable } from '@/components/data-table'
+import { DashboardTable } from '@/components/dashboard-table'
 import { SectionCards } from '@/components/section-cards'
 import { SiteHeader } from '@/components/site-header'
 import { summaryResolutionRate } from '../../lib/stats/summaryResolutionRate'
@@ -53,7 +53,7 @@ export default async function Page() {
               <ChartLineInteractive resolutionRateOverTime={resolutionRateOverTime} />
             </div>
             <div className="px-4 lg:px-6">
-              <DataTable data={data} />
+              <DashboardTable data={data} />
             </div>
             <div className="px-4 lg:px-6">
               <ActionPerformanceCard actionPerformances={actionPerformances} />

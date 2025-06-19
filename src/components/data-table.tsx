@@ -15,6 +15,7 @@ import {
   getSortedRowModel,
   useReactTable,
   Column,
+  RowSelectionState,
 } from "@tanstack/react-table"
 import {
   ChevronLeftIcon,
@@ -31,6 +32,7 @@ import { Sheet, SheetDescription } from "@/components/ui/sheet"
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Select,
   SelectContent,
@@ -78,6 +80,28 @@ function SortableHeader({
 
 // Example Tanstack ColumnDef for the Conversation schema
 export const conversationColumns: ColumnDef<Conversation>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: "id",
     header: ({ column }) => (
@@ -153,10 +177,12 @@ export const conversationColumns: ColumnDef<Conversation>[] = [
 
 interface DataTableProps {
   data: Conversation[]
+  onExportRequested: (ids: number[]) => void | Promise<void>
 }
 
 export function DataTable({
   data: initialData,
+  onExportRequested,
 }: DataTableProps) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
@@ -164,6 +190,7 @@ export function DataTable({
     []
   )
   const [sorting, setSorting] = React.useState<SortingState>([])
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({})
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
@@ -176,12 +203,14 @@ export function DataTable({
       sorting,
       columnVisibility,
       columnFilters,
+      rowSelection,
       pagination,
     },
     getRowId: (row) => row.id.toString(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -191,10 +220,27 @@ export function DataTable({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
 
+  const selectedRows = table.getFilteredSelectedRowModel().rows
+  const isSelectionEnabled = selectedRows.length > 0
+
   return (
     <Card className="@container/card">
       <CardHeader className="relative">
         <CardTitle>Conversations Requiring Attention</CardTitle>
+        {isSelectionEnabled && (
+          <div className="absolute right-4 top-4 flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              {selectedRows.length} selected
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onExportRequested(selectedRows.map(row => row.original.id))}
+            >
+              Export {selectedRows.length} conversations
+            </Button>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
 
@@ -252,6 +298,20 @@ export function DataTable({
         </div>
         <div className="flex items-center justify-between px-4">
           <div className="flex w-full items-center gap-8 lg:w-fit">
+            {isSelectionEnabled && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {selectedRows.length} of {table.getFilteredRowModel().rows.length} row(s) selected
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => table.toggleAllPageRowsSelected(false)}
+                >
+                  Clear selection
+                </Button>
+              </div>
+            )}
             <div className="hidden items-center gap-2 lg:flex">
               <Label htmlFor="rows-per-page" className="text-sm font-medium">
                 Rows per page
