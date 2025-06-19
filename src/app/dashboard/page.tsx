@@ -1,13 +1,12 @@
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import data from './data.json'
-import { AppSidebar } from '@/components/app-sidebar'
-import { ChartAreaInteractive } from '@/components/chart-area-interactive'
+import { ChartLineInteractive } from '@/components/chart-line-interactive'
 import { DataTable } from '@/components/data-table'
 import { SectionCards } from '@/components/section-cards'
 import { SiteHeader } from '@/components/site-header'
-import { computeResolutionRates } from '../../lib/stats/computeResolutionRate'
+import { summaryResolutionRate } from '../../lib/stats/summaryResolutionRate'
 import { WINDOW_SIZE } from '@/lib/constants'
 import { computeTimeToBooking } from '@/lib/stats/computeTimeToBooking'
+import { computeResolutionRateOverTime } from '@/lib/stats/computeResolutionRateOverTime'
 
 export default async function Page() {
   // Create a Date representing 14 days ago
@@ -15,8 +14,8 @@ export default async function Page() {
   const windowStart = new Date(now);
   windowStart.setDate(now.getDate() - WINDOW_SIZE);
 
-  const currentWindowResolutionRates = await computeResolutionRates(windowStart);
-  const previousResolutionRates = await computeResolutionRates(undefined, windowStart);
+  const currentWindowResolutionRates = await summaryResolutionRate(windowStart);
+  const previousResolutionRates = await summaryResolutionRate(undefined, windowStart);
 
   const resolutionRates = {
     currentWindow: currentWindowResolutionRates,
@@ -30,23 +29,23 @@ export default async function Page() {
     currentWindow: currentWindowTimeToBooking,
     allTime: previousTimeToBooking
   }
+
+  const resolutionRateOverTime = await computeResolutionRateOverTime();
+
   return (
-    <SidebarProvider>
-      <AppSidebar variant="inset" />
-      <SidebarInset>
-        <SiteHeader />
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <SectionCards resolutionRates={resolutionRates} timeToBooking={timeToBooking} />
-              <div className="px-4 lg:px-6">
-                <ChartAreaInteractive />
-              </div>
-              <DataTable data={data} />
+    <>
+      <SiteHeader />
+      <div className="flex flex-1 flex-col">
+        <div className="@container/main flex flex-1 flex-col gap-2">
+          <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+            <SectionCards resolutionRates={resolutionRates} timeToBooking={timeToBooking} />
+            <div className="px-4 lg:px-6">
+              <ChartLineInteractive resolutionRateOverTime={resolutionRateOverTime} />
             </div>
+            <DataTable data={data} />
           </div>
         </div>
-      </SidebarInset>
-    </SidebarProvider>
+      </div>
+    </>
   )
 }

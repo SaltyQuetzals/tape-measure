@@ -1,8 +1,9 @@
 import { db } from "./index";
-import { conversations, messages, actions, ACTION_TYPES, ACTION_RESULTS, CONVERSATION_STATUSES } from "./schema";
+import { conversations, messages, actions } from "./schema";
 import fs from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
+import { CONVERSATION_STATUSES, ACTION_TYPES, ACTION_RESULTS } from "@/lib/constants";
 
 const INCOMPLETE_STATUSES = [
     "blocked_needs_human",

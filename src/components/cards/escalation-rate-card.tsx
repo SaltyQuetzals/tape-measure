@@ -17,7 +17,6 @@ export function EscalationRateCard(props: EscalationRateCardProps) {
     const allTimeEscalationRate = allTimeEscalations / allTimeTotal;
     const currentWindowEscalationRateChange = (currentWindowEscalationRate - allTimeEscalationRate) / allTimeEscalationRate * 100;
 
-    console.log(JSON.stringify(props.escalationRates, null, 2));
     return (
         <Card className="@container/card">
             <CardHeader className="relative">

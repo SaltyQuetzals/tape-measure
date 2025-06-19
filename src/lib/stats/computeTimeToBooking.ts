@@ -45,7 +45,5 @@ export const computeTimeToBooking = async (startDate?: Date, endDate?: Date) => 
         timeToBooking: avg(sql<number>`${conversations.completedAt} - ${conversations.createdAt}`).mapWith(Number),
     }).from(conversations).where(whereClause).limit(1);
 
-    console.log(JSON.stringify(timesToBooking, null, 2));
-
     return timesToBooking[0];
 }
