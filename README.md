@@ -1,6 +1,16 @@
 # Tape Measure
 - A proof-of-concept for an operations dashboard.
 
+## Resources Used
+- [Cursor](https://www.cursor.com/) for:
+    - code review (reducing repetition, small refactors)
+    - syntactical questions around Tailscale styling
+    - Auto-generating scaffolding for Next.js route handling
+    - Database seeding script
+- [shadcn](https://ui.shadcn.com/) for:
+    - [Initial dashboard scaffolding](https://ui.shadcn.com/blocks#dashboard-01)
+- [Recharts](https://recharts.org/en-US) for
+
 ## Running Locally
 1. This project requires `pnpm` to run properly. You can install it [here](https://pnpm.io/installation).
 2. Once `pnpm` is installed, you'll need to go ahead and acquire the `conversations` directory. The directory structure should look like this:
