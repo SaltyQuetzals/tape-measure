@@ -1,4 +1,3 @@
-import data from './data.json'
 import { ChartLineInteractive } from '@/components/chart-line-interactive'
 import { DataTable } from '@/components/data-table'
 import { SectionCards } from '@/components/section-cards'
@@ -7,8 +6,17 @@ import { summaryResolutionRate } from '../../lib/stats/summaryResolutionRate'
 import { WINDOW_SIZE } from '@/lib/constants'
 import { computeTimeToBooking } from '@/lib/stats/computeTimeToBooking'
 import { computeResolutionRateOverTime } from '@/lib/stats/computeResolutionRateOverTime'
+import { db } from '@/db'
+import { conversations } from '@/db/schema'
+import { desc, eq } from 'drizzle-orm'
+import { ActionPerformanceCard } from '@/components/cards/action-performance-card'
+import { actionPerformance } from '@/lib/stats/actionPerformance'
 
 export default async function Page() {
+  const data = await db.select().from(conversations).where(
+    eq(conversations.status, "blocked_needs_human")
+  ).orderBy(desc(conversations.urgency), desc(conversations.createdAt));
+
   // Create a Date representing 14 days ago
   const now = new Date();
   const windowStart = new Date(now);
@@ -32,6 +40,8 @@ export default async function Page() {
 
   const resolutionRateOverTime = await computeResolutionRateOverTime();
 
+  const actionPerformances = await actionPerformance();
+
   return (
     <>
       <SiteHeader />
@@ -42,7 +52,12 @@ export default async function Page() {
             <div className="px-4 lg:px-6">
               <ChartLineInteractive resolutionRateOverTime={resolutionRateOverTime} />
             </div>
-            <DataTable data={data} />
+            <div className="px-4 lg:px-6">
+              <DataTable data={data} />
+            </div>
+            <div className="px-4 lg:px-6">
+              <ActionPerformanceCard actionPerformances={actionPerformances} />
+            </div>
           </div>
         </div>
       </div>

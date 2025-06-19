@@ -8,7 +8,7 @@ import {
 
 // Conversations table - represents a conversation session
 export const conversations = sqliteTable("conversations", {
-    id: text("id").primaryKey(), // UUID or phone number based
+    id: int("id").primaryKey({autoIncrement: true}),
     phone: int("phone").notNull(),
     jobType: text("job_type", { enum: JOB_TYPES }),
     urgency: int("urgency").notNull(), // 1-5 scale
@@ -26,8 +26,8 @@ export const conversations = sqliteTable("conversations", {
 
 // Messages table - individual messages within conversations
 export const messages = sqliteTable("messages", {
-    id: text("id").primaryKey(), // UUID
-    conversationId: text("conversation_id").notNull().references(() => conversations.id, { onDelete: "cascade" }),
+    id: int("id").primaryKey({autoIncrement: true}),
+    conversationId: int("conversation_id").notNull().references(() => conversations.id, { onDelete: "cascade" }),
     timestamp: text("timestamp").notNull(),
     senderType: text("sender_type", { enum: SENDER_TYPES }).notNull(),
     content: text("content").notNull(),
@@ -37,14 +37,14 @@ export const messages = sqliteTable("messages", {
 
 // Actions table - actions taken by the system during conversations
 export const actions = sqliteTable("actions", {
-    id: text("id").primaryKey(), // UUID
-    messageId: text("message_id").notNull().references(() => messages.id, { onDelete: "cascade" }),
-    conversationId: text("conversation_id").notNull().references(() => conversations.id, { onDelete: "cascade" }),
+    id: int("id").primaryKey({autoIncrement: true}),
+    messageId: int("message_id").notNull().references(() => messages.id, { onDelete: "cascade" }),
+    conversationId: int("conversation_id").notNull().references(() => conversations.id, { onDelete: "cascade" }),
     type: text("type", { enum: ACTION_TYPES }).notNull(),
     result: text("result", { enum: ACTION_RESULTS }).notNull(),
     error: text("error"), // Nullable error message
     metadata: text("metadata"), // Additional action-specific data as JSON string
-    createdAt: text("created_at").notNull(),
+    createdAt: int("created_at", {mode: 'timestamp'}).notNull(),
 });
 
 // Relations

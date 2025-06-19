@@ -2,7 +2,6 @@ import { db } from "./index";
 import { conversations, messages, actions } from "./schema";
 import fs from "fs";
 import path from "path";
-import { randomUUID } from "crypto";
 import { CONVERSATION_STATUSES, ACTION_TYPES, ACTION_RESULTS } from "@/lib/constants";
 
 const INCOMPLETE_STATUSES = [
@@ -83,7 +82,6 @@ async function processConversationFile(filePath: string, phoneNumber: number, ty
     const entries: ConversationEntry[] = lines.map(line => JSON.parse(line));
 
     // Create conversation record
-    const conversationId = randomUUID();
     const firstEntry = entries[0];
     const lastEntry = entries[entries.length - 1];
 
@@ -94,7 +92,6 @@ async function processConversationFile(filePath: string, phoneNumber: number, ty
     }
 
     const conversationData = {
-        id: conversationId,
         phone: phoneNumber,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         jobType: firstEntry.job_type as any,
@@ -108,16 +105,14 @@ async function processConversationFile(filePath: string, phoneNumber: number, ty
     };
 
     // Insert conversation
-    await db.insert(conversations).values(conversationData);
+    const { id: conversationId } = (await db.insert(conversations).values(conversationData).returning({ id: conversations.id }))[0];
 
     // Process messages and actions
     for (let i = 0; i < entries.length; i++) {
         const entry = entries[i];
-        const messageId = randomUUID();
 
         // Insert message
         const messageData = {
-            id: messageId,
             conversationId,
             timestamp: entry.timestamp,
             senderType: entry.sender_type,
@@ -126,7 +121,7 @@ async function processConversationFile(filePath: string, phoneNumber: number, ty
             createdAt: new Date(entry.timestamp),
         };
 
-        await db.insert(messages).values(messageData);
+        const { id: messageId } = (await db.insert(messages).values(messageData).returning({ id: messages.id }))[0];
 
         // Insert actions if any
         if (entry.actions && entry.actions.length > 0) {
@@ -143,14 +138,13 @@ async function processConversationFile(filePath: string, phoneNumber: number, ty
                 }
 
                 const actionData = {
-                    id: randomUUID(),
                     messageId,
                     conversationId,
                     type: action.type,
                     result: action.result,
                     error: action.error,
                     metadata: null,
-                    createdAt: entry.timestamp,
+                    createdAt: new Date(entry.timestamp),
                 };
 
                 await db.insert(actions).values(actionData);

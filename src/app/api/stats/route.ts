@@ -1,4 +1,4 @@
-import { computeResolutionRateOverTime } from "@/lib/stats/computeResolutionRateOverTime";
+import { actionPerformance } from "@/lib/stats/actionPerformance";
 import { NextResponse } from "next/server";
 
 /**
@@ -14,7 +14,7 @@ export async function GET(request: Request) {
   const startDate = startDateParam ? new Date(startDateParam) : undefined;
   const endDate = endDateParam ? new Date(endDateParam) : undefined;
 
-  const summary = await computeResolutionRateOverTime(startDate, endDate);
+  const summary = await actionPerformance(startDate, endDate);
 
   return NextResponse.json(summary);
 }

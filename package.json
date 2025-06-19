@@ -69,8 +69,7 @@
     "sonner": "latest",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
-    "vaul": "^0.9.6",
-    "zod": "latest"
+    "vaul": "^0.9.6"
   },
   "devDependencies": {
     "@types/node": "^22",
