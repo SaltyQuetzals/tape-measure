@@ -8,14 +8,12 @@ import { computeTimeToBooking } from '@/lib/stats/computeTimeToBooking'
 import { computeResolutionRateOverTime } from '@/lib/stats/computeResolutionRateOverTime'
 import { db } from '@/db'
 import { conversations } from '@/db/schema'
-import { desc, eq } from 'drizzle-orm'
+import { desc } from 'drizzle-orm'
 import { ActionPerformanceCard } from '@/components/cards/action-performance-card'
 import { actionPerformance } from '@/lib/stats/actionPerformance'
 
 export default async function Page() {
-  const data = await db.select().from(conversations).where(
-    eq(conversations.status, "blocked_needs_human")
-  ).orderBy(desc(conversations.urgency), desc(conversations.createdAt));
+  const data = await db.select().from(conversations).orderBy(desc(conversations.urgency), desc(conversations.createdAt));
 
   // Create a Date representing 14 days ago
   const now = new Date();
